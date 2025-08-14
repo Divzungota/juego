@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juego de IA - Modelo de Lenguaje Marcado</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f8fc;
+        margin: 0;
+        padding: 20px;
+    }
+    h1 {
+        text-align: center;
+        color: #2a5d84;
+    }
+    .section {
+        background: #fff;
+        padding: 15px;
+        margin: 15px auto;
+        border-radius: 8px;
+        max-width: 800px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .question {
+        margin-bottom: 10px;
+    }
+    .match-container {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    select {
+        margin: 5px 0;
+        padding: 5px;
+    }
+    button {
+        padding: 10px 20px;
+        background-color: #2a5d84;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #1f4763;
+    }
+    #result {
+        text-align: center;
+        font-size: 18px;
+        margin-top: 20px;
+        font-weight: bold;
+    }
+</style>
+</head>
+<body>
+
+<h1>Juego de IA - Modelo de Lenguaje Marcado</h1>
+
+<div class="section" id="quiz">
+    <h2>Parte 1: Preguntas de opción múltiple</h2>
+    <div class="question">
+        1. ¿Qué significa "Modelo de Lenguaje Marcado"?<br>
+        <input type="radio" name="q1" value="a"> Un modelo que solo entiende matemáticas.<br>
+        <input type="radio" name="q1" value="b"> Un modelo que entiende y usa etiquetas o marcas especiales en un texto.<br>
+        <input type="radio" name="q1" value="c"> Un modelo para dibujar.<br>
+    </div>
+    <div class="question">
+        2. ¿Para qué sirve un Modelo de Lenguaje Marcado?<br>
+        <input type="radio" name="q2" value="a"> Para etiquetar palabras y entender mejor su significado.<br>
+        <input type="radio" name="q2" value="b"> Para cocinar.<br>
+        <input type="radio" name="q2" value="c"> Para guardar fotos.<br>
+    </div>
+    <div class="question">
+        3. ¿Qué es una “etiqueta” en este modelo?<br>
+        <input type="radio" name="q3" value="a"> Un dibujo bonito.<br>
+        <input type="radio" name="q3" value="b"> Un marcador que indica qué tipo de palabra o información es.<br>
+        <input type="radio" name="q3" value="c"> Un juguete.<br>
+    </div>
+    <div class="question">
+        4. ¿Qué ventaja tiene un Modelo de Lenguaje Marcado?<br>
+        <input type="radio" name="q4" value="a"> Ayuda a la IA a entender mejor el contexto y responder con más precisión.<br>
+        <input type="radio" name="q4" value="b"> Hace que la IA corra más rápido físicamente.<br>
+        <input type="radio" name="q4" value="c"> No tiene ventajas.<br>
+    </div>
+    <div class="question">
+        5. ¿Cuál es un ejemplo de marca o etiqueta?<br>
+        <input type="radio" name="q5" value="a"> <nombre>Juan</nombre><br>
+        <input type="radio" name="q5" value="b"> 12345<br>
+        <input type="radio" name="q5" value="c"> Una pelota<br>
+    </div>
+</div>
+
+<div class="section" id="matching">
+    <h2>Parte 2: Empareja el concepto con su definición</h2>
+    <div class="match-container">
+        <div>
+            <p>Concepto</p>
+            <p>1. Etiqueta</p>
+            <p>2. Texto marcado</p>
+            <p>3. Contexto</p>
+            <p>4. IA</p>
+            <p>5. Procesamiento de lenguaje natural</p>
+        </div>
+        <div>
+            <p>Definición</p>
+            <select id="m1">
+                <option value="">--Selecciona--</option>
+                <option value="a">Marca especial que indica información.</option>
+                <option value="b">Texto que contiene etiquetas.</option>
+                <option value="c">Entorno o situación que da sentido a algo.</option>
+                <option value="d">Máquina que aprende y piensa.</option>
+                <option value="e">Técnica para que las máquinas entiendan el lenguaje humano.</option>
+            </select>
+            <select id="m2">
+                <option value="">--Selecciona--</option>
+                <option value="a">Marca especial que indica información.</option>
+                <option value="b">Texto que contiene etiquetas.</option>
+                <option value="c">Entorno o situación que da sentido a algo.</option>
+                <option value="d">Máquina que aprende y piensa.</option>
+                <option value="e">Técnica para que las máquinas entiendan el lenguaje humano.</option>
+            </select>
+            <select id="m3">
+                <option value="">--Selecciona--</option>
+                <option value="a">Marca especial que indica información.</option>
+                <option value="b">Texto que contiene etiquetas.</option>
+                <option value="c">Entorno o situación que da sentido a algo.</option>
+                <option value="d">Máquina que aprende y piensa.</option>
+                <option value="e">Técnica para que las máquinas entiendan el lenguaje humano.</option>
+            </select>
+            <select id="m4">
+                <option value="">--Selecciona--</option>
+                <option value="a">Marca especial que indica información.</option>
+                <option value="b">Texto que contiene etiquetas.</option>
+                <option value="c">Entorno o situación que da sentido a algo.</option>
+                <option value="d">Máquina que aprende y piensa.</option>
+                <option value="e">Técnica para que las máquinas entiendan el lenguaje humano.</option>
+            </select>
+            <select id="m5">
+                <option value="">--Selecciona--</option>
+                <option value="a">Marca especial que indica información.</option>
+                <option value="b">Texto que contiene etiquetas.</option>
+                <option value="c">Entorno o situación que da sentido a algo.</option>
+                <option value="d">Máquina que aprende y piensa.</option>
+                <option value="e">Técnica para que las máquinas entiendan el lenguaje humano.</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="section" style="text-align:center;">
+    <button onclick="checkAnswers()">Comprobar respuestas</button>
+    <div id="result"></div>
+</div>
+
+<script>
+function checkAnswers(){
+    let score = 0;
+    // Respuestas de múltiple opción
+    let correctMC = {
+        q1: "b",
+        q2: "a",
+        q3: "b",
+        q4: "a",
+        q5: "a"
+    };
+    for (let q in correctMC){
+        let radios = document.getElementsByName(q);
+        for (let r of radios){
+            if (r.checked && r.value === correctMC[q]){
+                score++;
+            }
+        }
+    }
+    // Respuestas de emparejamiento
+    let correctMatch = {
+        m1: "a",
+        m2: "b",
+        m3: "c",
+        m4: "d",
+        m5: "e"
+    };
+    for (let m in correctMatch){
+        let sel = document.getElementById(m);
+        if (sel.value === correctMatch[m]){
+            score++;
+        }
+    }
+    document.getElementById("result").innerHTML = 
+        "Tu puntaje es: " + score + " de 10.";
+}
+</script>
+
+</body>
+</html>
