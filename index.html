@@ -205,7 +205,8 @@ function showQuestion() {
                 if (opt.correct) {
                     score++;
                 } else {
-                    wrongAnswers.push({ pregunta: q.text, respuesta: opt.text });
+                    let correctOpt = q.options.find(o => o.correct).text;
+                    wrongAnswers.push({ pregunta: q.text, respuesta: opt.text, correcta: correctOpt });
                 }
                 currentQuestion++;
                 setTimeout(showQuestion, 300);
@@ -217,8 +218,6 @@ function showQuestion() {
         document.getElementById("matchingSection").classList.remove("hidden");
     }
 }
-
-showQuestion();
 
 // Drag & Drop
 let draggedItem = null;
@@ -252,6 +251,13 @@ document.querySelectorAll(".dropzone").forEach(zone => {
 
 function checkMatching() {
     let correctMatches = 0;
+    const matchAnswers = {
+        1: "Etiqueta",
+        2: "Texto marcado",
+        3: "Contexto",
+        4: "IA",
+        5: "Procesamiento de lenguaje natural"
+    };
     document.querySelectorAll(".dropzone").forEach(zone => {
         let item = zone.querySelector(".draggable");
         if (item && item.dataset.match === zone.dataset.match) {
@@ -259,7 +265,11 @@ function checkMatching() {
             correctMatches++;
         } else {
             zone.classList.add("incorrect");
-            wrongAnswers.push({ pregunta: `Emparejamiento: ${zone.textContent}`, respuesta: item ? item.textContent : "Sin respuesta" });
+            wrongAnswers.push({ 
+                pregunta: `Emparejamiento: ${zone.textContent}`, 
+                respuesta: item ? item.textContent : "Sin respuesta", 
+                correcta: matchAnswers[zone.dataset.match] 
+            });
         }
     });
     score += correctMatches;
@@ -274,7 +284,9 @@ function endGame() {
     if (wrongAnswers.length > 0) {
         html += "<h3>Errores:</h3><ul>";
         wrongAnswers.forEach(err => {
-            html += `<li><strong>Pregunta:</strong> ${err.pregunta}<br><strong>Tu respuesta:</strong> ${err.respuesta}</li>`;
+            html += `<li><strong>Pregunta:</strong> ${err.pregunta}<br>
+            <strong>Tu respuesta:</strong> ${err.respuesta}<br>
+            <strong>Respuesta correcta:</strong> ${err.correcta}</li>`;
         });
         html += "</ul>";
     } else {
@@ -310,6 +322,8 @@ function launchConfetti() {
         }, 50);
     }
 }
+
+showQuestion();
 </script>
 
 </body>
