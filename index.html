@@ -1,330 +1,463 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Juego de IA - MLM</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ahorcado LAM — Rework</title>
 <style>
-    body {
-        font-family: 'Comic Sans MS', sans-serif;
-        background: linear-gradient(135deg, #ffecd2, #fcb69f);
-        margin: 0;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        min-height: 100vh;
-    }
-    h1 {
-        text-align: center;
-        color: #2a5d84;
-        text-shadow: 1px 1px 2px #fff;
-        margin-bottom: 10px;
-    }
-    .section {
-        background: #ffffffcc;
-        padding: 15px;
-        margin-top: 15px;
-        border-radius: 12px;
-        max-width: 800px;
-        width: 100%;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        animation: fadeIn 0.5s ease-in-out;
-    }
-    button {
-        padding: 10px 20px;
-        background-color: #ff7f50;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 16px;
-        transition: transform 0.2s ease;
-    }
-    button:hover {
-        background-color: #ff6347;
-        transform: scale(1.05);
-    }
-    .option {
-        padding: 10px;
-        margin: 8px 0;
-        background-color: #f0f8ff;
-        border-radius: 8px;
-        cursor: pointer;
-        border: 2px solid transparent;
-        transition: transform 0.2s, background-color 0.3s, border 0.3s;
-    }
-    .option:hover {
-        background-color: #d1ecf1;
-        transform: scale(1.03);
-        border: 2px solid #17a2b8;
-    }
-    .hidden {
-        display: none;
-    }
-    #matchGame {
-        display: flex;
-        justify-content: space-between;
-        gap: 20px;
-        margin-top: 15px;
-        flex-wrap: wrap;
-    }
-    .column {
-        width: 45%;
-        background: #eef3f7;
-        padding: 10px;
-        border-radius: 5px;
-    }
-    .draggable {
-        background-color: #fff;
-        margin: 5px;
-        padding: 8px;
-        border-radius: 4px;
-        border: 2px solid #ccc;
-        cursor: grab;
-        transition: transform 0.2s, background-color 0.3s;
-    }
-    .draggable:hover {
-        background-color: #d1ffd1;
-        transform: scale(1.03);
-    }
-    .dropzone {
-        background-color: #f9f9f9;
-        min-height: 40px;
-        padding: 8px;
-        border: 2px dashed #ccc;
-        margin: 5px;
-        border-radius: 4px;
-    }
-    .correct {
-        background-color: #c8f7c5 !important;
-    }
-    .incorrect {
-        background-color: #f7c5c5 !important;
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+    :root{
+    --bg1:#0f172a; /* slate-900 */
+    --bg2:#111827; /* gray-900 */
+    --card:#0b1220ea;
+    --acc:#7c3aed; /* violet-600 */
+    --acc-2:#22d3ee; /* cyan-400 */
+    --good:#22c55e; /* green-500 */
+    --bad:#ef4444; /* red-500 */
+    --muted:#9ca3af; /* gray-400 */
+}
+  *{box-sizing:border-box}
+  body{
+    margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background: radial-gradient(1100px 600px at 20% -10%, #1f2937 0%, transparent 60%),
+                radial-gradient(1000px 600px at 120% 10%, #0b1020 0%, transparent 60%),
+                linear-gradient(135deg, var(--bg1), var(--bg2));
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+    color:#e5e7eb; /* gray-200 */
+    padding:24px;}
+    .container{
+    width:min(1100px,100%);
+    display:grid;grid-template-columns: 1.1fr 1fr;gap:18px;}
+    @media (max-width: 980px){
+    .container{grid-template-columns:1fr}}
+    .card{
+    background:var(--card); backdrop-filter: blur(8px);
+    border:1px solid #1f2937; border-radius:20px; padding:18px 18px 20px;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);}
+    h1{margin:0 0 6px;font-size:clamp(22px,2.6vw,30px)}
+    .sub{color:var(--muted);margin:0 0 14px;font-size:14px}
+
+  /* Hangman */
+  .gallows{position:relative;height:260px;border-radius:16px;background: #0a0f1a;
+           border:1px dashed #1f2937;overflow:hidden}
+  .beam, .post, .base, .rope, .head, .body, .arm-l, .arm-r, .leg-l, .leg-r{
+    position:absolute;background:#94a3b8; /* slate-400 */
+  }
+  .base{height:10px;width:70%;left:10%;bottom:16px;border-radius:6px}
+  .post{width:12px;height:80%;left:18%;bottom:26px;border-radius:6px}
+  .beam{height:12px;width:45%;left:18%;top:28px;border-radius:6px}
+  .rope{width:4px;height:38px;left:61%;top:40px;background:#cbd5e1}
+  .head{width:48px;height:48px;border-radius:50%;left:58%;top:78px;background:#e5e7eb;display:none}
+  .body{width:8px;height:70px;left:61.2%;top:128px;background:#e5e7eb;display:none}
+  .arm-l,.arm-r,.leg-l,.leg-r{width:8px;height:46px;background:#e5e7eb;display:none}
+  .arm-l{left:57.5%;top:142px;transform:rotate(45deg);transform-origin:top}
+  .arm-r{left:64.7%;top:142px;transform:rotate(-45deg);transform-origin:top}
+  .leg-l{left:58.5%;top:192px;transform:rotate(35deg);transform-origin:top}
+  .leg-r{left:63.7%;top:192px;transform:rotate(-35deg);transform-origin:top}
+  .pulse{position:absolute;inset:0;background:radial-gradient(600px 220px at 70% 35%, rgba(124,58,237,.15), transparent 45%)}
+
+  /* Word & UI */
+  .word{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+  .slot{width:40px;height:54px;border-radius:12px;border:1px solid #263143;
+        display:grid;place-items:center;font-size:26px;background:#0b1324}
+  .controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px}
+  .btn{appearance:none;border:none;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:600}
+  .btn.primary{background:linear-gradient(135deg,var(--acc),#4f46e5);color:white}
+  .btn.ghost{background:transparent;border:1px solid #263143;color:#cbd5e1}
+  .lives{font-variant-numeric:tabular-nums}
+  .kbd{display:inline-flex;align-items:center;justify-content:center;min-width:28px;padding:6px 8px;border-radius:10px;border:1px solid #263143;background:#0b1324}
+
+  /* Keyboard */
+  .keyboard{display:grid;grid-template-columns: repeat(13, 1fr);gap:8px;margin-top:12px}
+  .key{border:1px solid #263143;background:#0b1324;border-radius:10px;padding:10px 0;text-align:center;cursor:pointer;user-select:none}
+  .key:hover{border-color:#334155}
+  .key.used{opacity:.45;cursor:not-allowed}
+  .key.good{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.45)}
+  .key.bad{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.45)}
+
+  /* Panel derecho */
+  .panel h3{margin:0 0 8px}
+  .list{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{border:1px solid #263143;background:#0b1324;border-radius:999px;padding:6px 10px;font-size:12px;color:#cbd5e1}
+
+  /* Modal */
+  .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(2,6,23,.6);backdrop-filter:blur(4px);z-index:50}
+  .modal.show{display:grid}
+  .modal-card{width:min(680px,92vw);background:#0b1220;border:1px solid #263143;border-radius:20px;padding:18px}
+  .q-title{font-weight:700;margin:0 0 6px;font-size:18px}
+  .q-desc{color:#9ca3af;margin:0 0 12px;font-size:14px}
+  .options{display:grid;gap:8px}
+  .opt{border:1px solid #263143;background:#0b1324;border-radius:12px;padding:10px;cursor:pointer}
+  .opt:hover{border-color:#334155}
+  .row{display:grid;grid-template-columns:1fr 160px;gap:8px;align-items:center}
+  select{background:#0b1324;border:1px solid #263143;color:#e5e7eb;border-radius:10px;padding:8px}
+  .result-banner{margin-top:10px;padding:10px;border-radius:12px;display:none}
+  .result-banner.ok{display:block;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.45)}
+  .result-banner.err{display:block;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.45)}
+
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#0b1324;border:1px solid #263143;color:#cbd5e1;border-radius:12px;padding:10px 14px;display:none}
+  .toast.show{display:block}
+
 </style>
 </head>
 <body>
+  <div class="container">
+    <!-- Zona de juego -->
+    <section class="card">
+      <h1>🎯 Ahorcado LAM</h1>
+      <p class="sub">Forma palabras relacionadas con <strong>Modelos de Lenguaje Marcado (LAM)</strong>. Si fallas una letra, tendrás que responder un reto (selección múltiple o emparejamiento). ¡Si completas la palabra: <strong>Buena</strong>! 😎</p>
 
-<h1>🎯 Juego de IA - Modelo de Lenguaje Marcado 🎯</h1>
+      <div class="gallows" aria-hidden="true">
+        <div class="pulse"></div>
+        <div class="base"></div>
+        <div class="post"></div>
+        <div class="beam"></div>
+        <div class="rope"></div>
+        <div class="head" id="hm-head"></div>
+        <div class="body" id="hm-body"></div>
+        <div class="arm-l" id="hm-arm-l"></div>
+        <div class="arm-r" id="hm-arm-r"></div>
+        <div class="leg-l" id="hm-leg-l"></div>
+        <div class="leg-r" id="hm-leg-r"></div>
+      </div>
 
-<div class="section" id="quizSection">
-    <div id="questionContainer"></div>
-</div>
+      <div class="word" id="word"></div>
 
-<div class="section hidden" id="matchingSection">
-    <h2>Empareja el concepto con su definición</h2>
-    <div id="matchGame">
-        <div class="column" id="concepts">
-            <div class="draggable" draggable="true" data-match="1">Etiqueta</div>
-            <div class="draggable" draggable="true" data-match="2">Texto marcado</div>
-            <div class="draggable" draggable="true" data-match="3">Contexto</div>
-            <div class="draggable" draggable="true" data-match="4">IA</div>
-            <div class="draggable" draggable="true" data-match="5">Procesamiento de lenguaje natural</div>
-        </div>
-        <div class="column" id="definitions">
-            <div class="dropzone" data-match="1">Marca especial que indica información.</div>
-            <div class="dropzone" data-match="2">Texto que contiene etiquetas.</div>
-            <div class="dropzone" data-match="3">Entorno o situación que da sentido a algo.</div>
-            <div class="dropzone" data-match="4">Máquina que aprende y piensa.</div>
-            <div class="dropzone" data-match="5">Técnica para que las máquinas entiendan el lenguaje humano.</div>
-        </div>
+      <div class="controls">
+        <div class="lives"><span class="kbd">❤️</span> Vidas: <span id="lives">6</span></div>
+        <button class="btn ghost" id="hintBtn" title="Muestra una pista">Pista</button>
+        <button class="btn primary" id="restartBtn">Nuevo juego</button>
+      </div>
+
+      <div class="keyboard" id="keyboard"></div>
+    </section>
+
+    <!-- Panel lateral: glosario y progreso -->
+    <aside class="card panel">
+      <h3>Glosario LAM (palabras posibles)</h3>
+      <div class="list" id="vocab"></div>
+      <hr style="border-color:#1f2937;margin:14px 0" />
+      <h3>Progreso</h3>
+      <p class="sub">Aciertos: <span id="hits">0</span> · Retos superados: <span id="challenges">0</span></p>
+      <p class="sub">Pista actual: <em id="hint">—</em></p>
+    </aside>
+  </div>
+
+  <!-- Modal de retos -->
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <div id="modalContent">
+        <!-- Se inyecta dinámicamente -->
+      </div>
     </div>
-    <button onclick="checkMatching()">Comprobar emparejamientos</button>
-</div>
+  </div>
 
-<div id="result" class="section hidden"></div>
+  <div class="toast" id="toast">Buena 🎉</div>
 
 <script>
-const questions = [
+(() => {
+  // ======= DATA =======
+  const WORDS = [
+    { w:"ETIQUETA", hint:"Marcador que indica el tipo de información." },
+    { w:"CONTEXTO", hint:"Entorno que da sentido al texto." },
+    { w:"MARCADO",  hint:"Uso de etiquetas dentro del texto." },
+    { w:"ANOTACION", hint:"Proceso de etiquetar datos con significado." },
+    { w:"ENTIDAD", hint:"Objeto nombrado: persona, lugar, organización…" },
+    { w:"TOKEN", hint:"Unidad mínima de texto tras el preprocesamiento." },
+    { w:"PARSEO", hint:"Análisis estructural del texto (parse)." },
+    { w:"ONTOLOGIA", hint:"Esquema formal de conceptos y relaciones." },
+    { w:"NLP", hint:"Procesamiento de Lenguaje Natural." },
+    { w:"LAM", hint:"Modelo de Lenguaje Marcado." },
+  ];
+
+  const ABC = [
+    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P','Q','R','S','T','U','V','W','X','Y','Z'
+  ];
+
+  const MCQ = [
     {
-        text: "¿Qué significa 'Modelo de Lenguaje Marcado'?",
-        options: [
-            { text: "Un modelo que solo entiende matemáticas.", correct: false },
-            { text: "Un modelo que entiende y usa etiquetas o marcas especiales en un texto.", correct: true },
-            { text: "Un modelo para dibujar.", correct: false }
-        ]
+      q:"¿Qué es una etiqueta en LAM?",
+      options:[
+        {t:"Un decorado del texto", ok:false},
+        {t:"Un marcador que tipifica información", ok:true},
+        {t:"Un emoji", ok:false},
+      ]
     },
     {
-        text: "¿Para qué sirve un Modelo de Lenguaje Marcado?",
-        options: [
-            { text: "Para etiquetar palabras y entender mejor su significado.", correct: true },
-            { text: "Para cocinar.", correct: false },
-            { text: "Para guardar fotos.", correct: false }
-        ]
+      q:"¿Para qué sirve el marcado en textos?",
+      options:[
+        {t:"Para cambiar el color del fondo", ok:false},
+        {t:"Para estructurar y añadir semántica", ok:true},
+        {t:"Para acortar palabras", ok:false},
+      ]
     },
     {
-        text: "¿Qué es una 'etiqueta' en este modelo?",
-        options: [
-            { text: "Un dibujo bonito.", correct: false },
-            { text: "Un marcador que indica qué tipo de palabra o información es.", correct: true },
-            { text: "Un juguete.", correct: false }
-        ]
+      q:"¿Cuál es un ejemplo de etiqueta?",
+      options:[
+        {t:"<nombre>Juan</nombre>", ok:true},
+        {t:"Juan 12345", ok:false},
+        {t:"#SoloHashtag", ok:false},
+      ]
     },
-    {
-        text: "¿Qué ventaja tiene un Modelo de Lenguaje Marcado?",
-        options: [
-            { text: "Ayuda a la IA a entender mejor el contexto y responder con más precisión.", correct: true },
-            { text: "Hace que la IA corra más rápido físicamente.", correct: false },
-            { text: "No tiene ventajas.", correct: false }
-        ]
-    },
-    {
-        text: "¿Cuál es un ejemplo de marca o etiqueta?",
-        options: [
-            { text: "<nombre>Juan</nombre>", correct: true },
-            { text: "12345", correct: false },
-            { text: "Una pelota", correct: false }
-        ]
+  ];
+
+  // Matching con selects (tres pares por reto)
+  const MATCH_BANK = [
+    { left:"Etiqueta", right:"Marca especial que indica información." },
+    { left:"Texto marcado", right:"Texto que contiene etiquetas." },
+    { left:"Contexto", right:"Entorno que da sentido a algo." },
+    { left:"IA", right:"Sistema que aprende y razona." },
+    { left:"NLP", right:"Técnicas para entender lenguaje humano." },
+    { left:"Entidad", right:"Objeto nombrado (persona, lugar…)." },
+    { left:"Ontología", right:"Esquema formal de conceptos/relaciones." },
+  ];
+
+  // ======= STATE =======
+  let target = null;         // {w, hint}
+  let revealed = [];         // boolean[] por letra
+  let lives = 6;
+  let hits = 0;
+  let challenges = 0;
+  let used = new Set();
+
+  // ======= DOM =======
+  const elWord = document.getElementById('word');
+  const elKeyboard = document.getElementById('keyboard');
+  const elLives = document.getElementById('lives');
+  const elHits = document.getElementById('hits');
+  const elChal = document.getElementById('challenges');
+  const elVocab = document.getElementById('vocab');
+  const elHint = document.getElementById('hint');
+  const elRestart = document.getElementById('restartBtn');
+  const elHintBtn = document.getElementById('hintBtn');
+  const elModal = document.getElementById('modal');
+  const elModalContent = document.getElementById('modalContent');
+  const toast = document.getElementById('toast');
+
+  const parts = [
+    document.getElementById('hm-head'),
+    document.getElementById('hm-body'),
+    document.getElementById('hm-arm-l'),
+    document.getElementById('hm-arm-r'),
+    document.getElementById('hm-leg-l'),
+    document.getElementById('hm-leg-r'),
+  ];
+
+  function rand(arr){return arr[Math.floor(Math.random()*arr.length)]}
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
     }
-];
+    return a;
+  }
 
-let currentQuestion = 0;
-let score = 0;
-let wrongAnswers = [];
+  function newGame(){
+    target = rand(WORDS);
+    revealed = new Array(target.w.length).fill(false);
+    lives = 6; hits = 0; challenges = 0; used = new Set();
+    elLives.textContent = lives; elHits.textContent = hits; elChal.textContent = challenges;
+    elHint.textContent = '—';
+    parts.forEach(p=>p.style.display='none');
+    drawWord();
+    drawKeyboard();
+  }
 
-function showQuestion() {
-    const container = document.getElementById("questionContainer");
-    container.innerHTML = "";
-
-    if (currentQuestion < questions.length) {
-        let q = questions[currentQuestion];
-        let h2 = document.createElement("h2");
-        h2.textContent = `Pregunta ${currentQuestion + 1}: ${q.text}`;
-        container.appendChild(h2);
-
-        q.options.forEach(opt => {
-            let div = document.createElement("div");
-            div.classList.add("option");
-            div.textContent = opt.text;
-            div.onclick = () => {
-                if (opt.correct) {
-                    score++;
-                } else {
-                    let correctOpt = q.options.find(o => o.correct).text;
-                    wrongAnswers.push({ pregunta: q.text, respuesta: opt.text, correcta: correctOpt });
-                }
-                currentQuestion++;
-                setTimeout(showQuestion, 300);
-            };
-            container.appendChild(div);
-        });
-    } else {
-        document.getElementById("quizSection").classList.add("hidden");
-        document.getElementById("matchingSection").classList.remove("hidden");
-    }
-}
-
-// Drag & Drop
-let draggedItem = null;
-
-document.addEventListener("dragstart", function(e) {
-    if (e.target.classList.contains("draggable")) {
-        draggedItem = e.target;
-        setTimeout(() => (e.target.style.display = "none"), 0);
-    }
-});
-
-document.addEventListener("dragend", function(e) {
-    if (draggedItem) {
-        draggedItem.style.display = "block";
-        draggedItem = null;
-    }
-});
-
-document.querySelectorAll(".dropzone").forEach(zone => {
-    zone.addEventListener("dragover", function(e) {
-        e.preventDefault();
+  function drawWord(){
+    elWord.innerHTML = '';
+    [...target.w].forEach((ch,i) => {
+      const d = document.createElement('div'); d.className='slot';
+      d.textContent = revealed[i] || !ABC.includes(ch) ? ch : '';
+      elWord.appendChild(d);
     });
+  }
 
-    zone.addEventListener("drop", function(e) {
-        e.preventDefault();
-        if (draggedItem) {
-            this.appendChild(draggedItem);
+  function drawKeyboard(){
+    elKeyboard.innerHTML = '';
+    ABC.forEach(ch => {
+      const k = document.createElement('div');
+      k.className = 'key';
+      k.textContent = ch;
+      if(used.has(ch)) k.classList.add('used');
+      k.addEventListener('click', () => onKey(ch, k));
+      elKeyboard.appendChild(k);
+    });
+  }
+
+  function revealLetter(ch){
+    let gained = 0;
+    [...target.w].forEach((c, i) => {
+      if(!revealed[i] && c === ch){ revealed[i] = true; gained++; }
+    });
+    if(gained>0){
+      hits += gained; elHits.textContent = hits; drawWord();
+      if(revealed.every(v=>v)) win();
+    }
+  }
+
+  function onKey(ch, keyEl){
+    if(used.has(ch) || lives<=0) return;
+    used.add(ch);
+    const present = target.w.includes(ch);
+    keyEl.classList.add('used');
+
+    if(present){ keyEl.classList.add('good'); revealLetter(ch); }
+    else{
+      keyEl.classList.add('bad');
+      // Lanzar reto; si falla el reto, pierde vida.
+      askChallenge().then(ok=>{
+        if(ok){
+          // perdona la vida
+          flashBanner(true, '¡Salvaste la vida con el reto!');
+        }else{
+          loseLife();
         }
-    });
-});
+      });
+    }
+  }
 
-function checkMatching() {
-    let correctMatches = 0;
-    const matchAnswers = {
-        1: "Etiqueta",
-        2: "Texto marcado",
-        3: "Contexto",
-        4: "IA",
-        5: "Procesamiento de lenguaje natural"
+  function loseLife(){
+    lives--; elLives.textContent = lives;
+    const idx = 5 - lives; // 0..5
+    if(parts[idx]) parts[idx].style.display='block';
+    if(lives<=0) return gameOver();
+  }
+
+  function win(){
+    toast.textContent = 'Buena 🎉';
+    toast.classList.add('show');
+    setTimeout(()=>toast.classList.remove('show'), 2000);
+    // Bloquear teclado
+    [...elKeyboard.children].forEach(k=>k.classList.add('used'));
+  }
+
+  function gameOver(){
+    showModal(`<h3 class="q-title">Fin del juego</h3>
+               <p class="q-desc">La palabra era <strong>${target.w}</strong>. ¿Intentas de nuevo?</p>
+               <div style="display:flex;gap:8px;justify-content:flex-end">
+                 <button class="btn ghost" id="closeOver">Cerrar</button>
+                 <button class="btn primary" id="again">Nuevo juego</button>
+               </div>`);
+    document.getElementById('closeOver').onclick=hideModal;
+    document.getElementById('again').onclick=()=>{ hideModal(); newGame(); };
+  }
+
+  // ======= RETOS =======
+  function askChallenge(){
+    return new Promise((resolve)=>{
+      const type = Math.random()<0.5 ? 'mcq' : 'match';
+      if(type==='mcq') renderMCQ(resolve); else renderMatch(resolve);
+    });
+  }
+
+  function renderMCQ(done){
+    const item = rand(MCQ);
+    const opts = item.options.map((o,i)=>`<div class="opt" data-i="${i}">${o.t}</div>`).join('');
+    showModal(`
+      <h3 class="q-title">Reto: Selección múltiple</h3>
+      <p class="q-desc">Responde correctamente para no perder una vida.</p>
+      <div style="margin:8px 0 10px;font-weight:700">${item.q}</div>
+      <div class="options" id="opts">${opts}</div>
+      <div id="ban" class="result-banner"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+        <button class="btn ghost" id="skip">Rendirse</button>
+      </div>
+    `);
+    const ban = document.getElementById('ban');
+    const optsEl = document.getElementById('opts');
+    const skip = document.getElementById('skip');
+
+    optsEl.querySelectorAll('.opt').forEach((el)=>{
+      el.onclick = ()=>{
+        const ok = item.options[+el.dataset.i].ok;
+        if(ok){
+          ban.className='result-banner ok'; ban.textContent='¡Correcto!';
+          challenges++; elChal.textContent = challenges;
+          setTimeout(()=>{ hideModal(); done(true); }, 500);
+        }else{
+          ban.className='result-banner err'; ban.textContent='Incorrecto :(';
+          setTimeout(()=>{ hideModal(); done(false); }, 500);
+        }
+      };
+    });
+    skip.onclick=()=>{ hideModal(); done(false); };
+  }
+
+  function renderMatch(done){
+    // Tomar 3 pares al azar
+    const pairs = shuffle(MATCH_BANK).slice(0,3);
+    const rights = shuffle(pairs.map(p=>p.right));
+    const rows = pairs.map((p,i)=>{
+      const options = rights.map(r=>`<option>${r}</option>`).join('');
+      return `<div class="row"><div>${p.left}</div><div><select data-left="${p.left}">${options}</select></div></div>`;
+    }).join('');
+
+    showModal(`
+      <h3 class="q-title">Reto: Emparejamiento</h3>
+      <p class="q-desc">Relaciona cada concepto con su definición para no perder una vida.</p>
+      <div id="rows" class="options">${rows}</div>
+      <div id="ban" class="result-banner"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+        <button class="btn ghost" id="skip">Rendirse</button>
+        <button class="btn primary" id="submit">Comprobar</button>
+      </div>
+    `);
+
+    const submit = document.getElementById('submit');
+    const skip = document.getElementById('skip');
+    const ban = document.getElementById('ban');
+
+    submit.onclick = ()=>{
+      let allGood = true;
+      document.querySelectorAll('#rows select').forEach(sel=>{
+        const left = sel.getAttribute('data-left');
+        const correct = MATCH_BANK.find(p=>p.left===left).right;
+        if(sel.value !== correct) allGood = false;
+      });
+      if(allGood){
+        ban.className='result-banner ok'; ban.textContent='¡Perfecto!';
+        challenges++; elChal.textContent = challenges;
+        setTimeout(()=>{ hideModal(); done(true); }, 500);
+      }else{
+        ban.className='result-banner err'; ban.textContent='Hay errores. :(';
+        setTimeout(()=>{ hideModal(); done(false); }, 500);
+      }
     };
-    document.querySelectorAll(".dropzone").forEach(zone => {
-        let item = zone.querySelector(".draggable");
-        if (item && item.dataset.match === zone.dataset.match) {
-            zone.classList.add("correct");
-            correctMatches++;
-        } else {
-            zone.classList.add("incorrect");
-            wrongAnswers.push({ 
-                pregunta: `Emparejamiento: ${zone.textContent}`, 
-                respuesta: item ? item.textContent : "Sin respuesta", 
-                correcta: matchAnswers[zone.dataset.match] 
-            });
-        }
-    });
-    score += correctMatches;
-    endGame();
-}
+    skip.onclick = ()=>{ hideModal(); done(false); };
+  }
 
-function endGame() {
-    document.getElementById("matchingSection").classList.add("hidden");
-    document.getElementById("result").classList.remove("hidden");
+  // ======= MODAL UTILS =======
+  function showModal(html){
+    elModalContent.innerHTML = html;
+    elModal.classList.add('show');
+  }
+  function hideModal(){ elModal.classList.remove('show'); }
 
-    let html = `<h2>🎉 Tu puntaje final es: ${score} de 10 🎉</h2>`;
-    if (wrongAnswers.length > 0) {
-        html += "<h3>Errores:</h3><ul>";
-        wrongAnswers.forEach(err => {
-            html += `<li><strong>Pregunta:</strong> ${err.pregunta}<br>
-            <strong>Tu respuesta:</strong> ${err.respuesta}<br>
-            <strong>Respuesta correcta:</strong> ${err.correcta}</li>`;
-        });
-        html += "</ul>";
-    } else {
-        html += "<p>¡Perfecto! No cometiste errores. 🏆</p>";
-    }
-    document.getElementById("result").innerHTML = html;
+  // ======= UI MISC =======
+  function flashBanner(ok, msg){
+    const b = document.createElement('div');
+    b.className = `result-banner ${ok?'ok':'err'}`;
+    b.style.position='absolute'; b.style.top='10px'; b.style.right='10px';
+    b.textContent = msg;
+    document.body.appendChild(b);
+    setTimeout(()=>b.remove(), 1200);
+  }
 
-    launchConfetti();
-}
+  // Pista simple: muestra hint de la palabra actual
+  elHintBtn.addEventListener('click', ()=>{
+    elHint.textContent = target.hint;
+  });
 
-// 🎊 Confeti simple
-function launchConfetti() {
-    for (let i = 0; i < 30; i++) {
-        const conf = document.createElement("div");
-        conf.style.position = "fixed";
-        conf.style.width = "10px";
-        conf.style.height = "10px";
-        conf.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
-        conf.style.top = "-10px";
-        conf.style.left = `${Math.random() * 100}vw`;
-        conf.style.opacity = 0.8;
-        conf.style.borderRadius = "50%";
-        document.body.appendChild(conf);
+  // Reiniciar
+  elRestart.addEventListener('click', newGame);
 
-        let fall = setInterval(() => {
-            let top = parseFloat(conf.style.top);
-            if (top > window.innerHeight) {
-                clearInterval(fall);
-                conf.remove();
-            } else {
-                conf.style.top = `${top + 5}px`;
-            }
-        }, 50);
-    }
-}
+  // Pintar vocab chips
+  elVocab.innerHTML = WORDS.map(x=>`<span class="chip">${x.w}</span>`).join('');
 
-showQuestion();
+  // INIT
+  newGame();
+})();
 </script>
-
 </body>
 </html>
